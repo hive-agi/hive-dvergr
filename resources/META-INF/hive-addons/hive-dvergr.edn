@@ -1,0 +1,8 @@
+{:addon/id "hive.dvergr"
+ :addon/kind :addon
+ :addon/type :native
+ :addon/version "0.1.0-SNAPSHOT"
+ :addon/init-ns "hive-dvergr.addon"
+ :addon/init-fn "addon-ctor"
+ :addon/capabilities #{:tools :health-reporting :agent-runtime :datahike}
+ :addon/description "Experimental dvergr runtime and Datahike evidence adapter for Hive agents"}

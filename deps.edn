@@ -1,0 +1,59 @@
+{:paths ["src" "resources"]
+
+ :deps
+ {org.clojure/clojure {:mvn/version "1.12.1"}
+
+  ;; Standalone host-neutral addon contract.
+  io.github.hive-agi/hive-addon {:mvn/version "0.3.1"}
+
+  ;; Result ADT and shared Malli registry.
+  io.github.hive-agi/hive-dsl
+  {:mvn/version "0.5.2"}
+  io.github.hive-agi/hive-schemas {:mvn/version "0.1.5"}
+
+  ;; Experimental runtime. Exact SHA keeps the spike reproducible.
+  org.replikativ/dvergr
+  {:git/url "https://github.com/replikativ/dvergr.git"
+   :git/sha "3093b6cd97118d3cb36e2f11d5f17ebb2f7743c6"}
+
+  ;; Explicit authority for run evidence. Do not rely on dvergr transitively.
+  org.replikativ/datahike {:mvn/version "0.8.1708"}
+
+  ;; Hive's house version wins over dvergr's older transitive Malli pin.
+  metosin/malli {:mvn/version "0.20.1"}}
+
+ :aliases
+ {
+  ;; :build — tools.build entrypoint (clojure -T:build <task>). Canonical hive
+  ;; build: jar / jar-aot / install / bump / verify-license / deploy.
+  :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.9"}
+                 slipset/deps-deploy {:mvn/version "0.2.2"}}
+          :ns-default build}
+:local-src
+  {:extra-paths ["../hive-schemas/src/synth"]
+   :override-deps
+   {io.github.hive-agi/hive-addon   {:local/root "../hive-addon"}
+    io.github.hive-agi/hive-dsl     {:local/root "../hive-dsl"}
+    io.github.hive-agi/hive-schemas {:local/root "../hive-schemas"}
+    io.github.hive-agi/hive-test    {:local/root "../hive-test"}
+    org.replikativ/dvergr           {:local/root "../clones-ref/dvergr"}}}
+
+  ;; Provisional compatibility classpath. hive-dvergr has no production
+  ;; dependency on proprietary hive-agent or hive-mcp namespaces.
+  :hive-agent-local
+  {:extra-deps {local/hive-agent {:local/root "../hive-agent"}}}
+
+  :test
+  {:extra-paths ["test"]
+   :extra-deps  {io.github.hive-agi/hive-test {:mvn/version "0.3.6"}
+                 org.clojure/test.check       {:mvn/version "1.1.1"}
+                 lambdaisland/kaocha          {:mvn/version "1.91.1392"}}
+   :main-opts   ["-m" "kaocha.runner"]}
+
+  :nrepl
+  {:extra-paths ["dev" "test"]
+   :extra-deps  {io.github.hive-agi/hive-test {:mvn/version "0.3.6"}
+                 nrepl/nrepl                  {:mvn/version "1.3.1"}
+                 cider/cider-nrepl            {:mvn/version "0.50.2"}}
+   :main-opts   ["-m" "nrepl.cmdline"
+                 "--middleware" "[cider.nrepl/cider-middleware]"]}}}

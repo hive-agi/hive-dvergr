@@ -1,0 +1,2 @@
+{:project-id "hive-dvergr" 
+ :carto {:source-roots ["../hive-schemas/src/synth" "resources" "src" "test"]}}

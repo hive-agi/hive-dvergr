@@ -1,0 +1,12 @@
+/.cpcache/
+/.clj-kondo/.cache/
+/.lsp/
+/.nrepl-port
+/.hive-dvergr/
+/target/
+*.class
+*.jar
+*.log
+
+.cpcache/
+target/
