@@ -1,2 +1,3 @@
-{:project-id "hive-dvergr" 
+{:project-id "hive-dvergr"
+ :parent "hive" 
  :carto {:source-roots ["../hive-schemas/src/synth" "resources" "src" "test"]}}
