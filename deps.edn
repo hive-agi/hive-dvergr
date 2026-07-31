@@ -8,7 +8,7 @@
 
   ;; Result ADT and shared Malli registry.
   io.github.hive-agi/hive-dsl
-  {:mvn/version "0.5.7"}
+  {:mvn/version "0.5.8"}
   io.github.hive-agi/hive-schemas {:mvn/version "0.1.10"}
 
   ;; Experimental runtime. Exact SHA keeps the spike reproducible.
