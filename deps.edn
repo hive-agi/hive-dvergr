@@ -8,8 +8,8 @@
 
   ;; Result ADT and shared Malli registry.
   io.github.hive-agi/hive-dsl
-  {:mvn/version "0.5.15"}
-  io.github.hive-agi/hive-schemas {:mvn/version "0.1.14"}
+  {:mvn/version "0.5.16"}
+  io.github.hive-agi/hive-schemas {:mvn/version "0.1.15"}
 
   ;; Experimental runtime. Exact SHA keeps the spike reproducible.
   org.replikativ/dvergr
@@ -26,7 +26,7 @@
  {
   ;; :build — tools.build entrypoint (clojure -T:build <task>). Canonical hive
   ;; build: jar / jar-aot / install / bump / verify-license / deploy.
-  :build {:deps {io.github.hive-agi/hive-build {:mvn/version "0.1.9"}}
+  :build {:deps {io.github.hive-agi/hive-build {:mvn/version "0.1.10"}}
           :ns-default hive-build.api}
 :local-src
   {:extra-paths ["../hive-schemas/src/synth"]
@@ -44,14 +44,14 @@
 
   :test
   {:extra-paths ["test"]
-   :extra-deps  {io.github.hive-agi/hive-test {:mvn/version "0.3.12"}
+   :extra-deps  {io.github.hive-agi/hive-test {:mvn/version "0.3.14"}
                  org.clojure/test.check       {:mvn/version "1.1.3"}
                  lambdaisland/kaocha          {:mvn/version "1.91.1392"}}
    :main-opts   ["-m" "kaocha.runner"]}
 
   :nrepl
   {:extra-paths ["dev" "test"]
-   :extra-deps  {io.github.hive-agi/hive-test {:mvn/version "0.3.12"}
+   :extra-deps  {io.github.hive-agi/hive-test {:mvn/version "0.3.14"}
                  nrepl/nrepl                  {:mvn/version "1.7.0"}
                  cider/cider-nrepl            {:mvn/version "0.62.2"}}
    :main-opts   ["-m" "nrepl.cmdline"
