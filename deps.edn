@@ -8,8 +8,8 @@
 
   ;; Result ADT and shared Malli registry.
   io.github.hive-agi/hive-dsl
-  {:mvn/version "0.5.14"}
-  io.github.hive-agi/hive-schemas {:mvn/version "0.1.13"}
+  {:mvn/version "0.5.15"}
+  io.github.hive-agi/hive-schemas {:mvn/version "0.1.14"}
 
   ;; Experimental runtime. Exact SHA keeps the spike reproducible.
   org.replikativ/dvergr
@@ -26,7 +26,7 @@
  {
   ;; :build — tools.build entrypoint (clojure -T:build <task>). Canonical hive
   ;; build: jar / jar-aot / install / bump / verify-license / deploy.
-  :build {:deps {io.github.hive-agi/hive-build {:mvn/version "0.1.8"}}
+  :build {:deps {io.github.hive-agi/hive-build {:mvn/version "0.1.9"}}
           :ns-default hive-build.api}
 :local-src
   {:extra-paths ["../hive-schemas/src/synth"]
