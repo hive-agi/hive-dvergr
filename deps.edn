@@ -29,7 +29,7 @@
   :build {:deps {io.github.hive-agi/hive-build {:mvn/version "0.1.10"}}
           :ns-default hive-build.api}
 :local-src
-  {:extra-paths ["../hive-schemas/src/synth"]
+  {:extra-paths ["../hive-schemas/synth"]
    :override-deps
    {io.github.hive-agi/hive-addon   {:local/root "../hive-addon"}
     io.github.hive-agi/hive-dsl     {:local/root "../hive-dsl"}
