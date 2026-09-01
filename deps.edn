@@ -4,12 +4,12 @@
  {org.clojure/clojure {:mvn/version "1.12.5"}
 
   ;; Standalone host-neutral addon contract.
-  io.github.hive-agi/hive-addon {:mvn/version "0.3.7"}
+  io.github.hive-agi/hive-addon {:mvn/version "0.3.9"}
 
   ;; Result ADT and shared Malli registry.
   io.github.hive-agi/hive-dsl
-  {:mvn/version "0.5.17"}
-  io.github.hive-agi/hive-schemas {:mvn/version "0.1.26"}
+  {:mvn/version "0.5.19"}
+  io.github.hive-agi/hive-schemas {:mvn/version "0.1.29"}
 
   ;; Experimental runtime. Exact SHA keeps the spike reproducible.
   org.replikativ/dvergr
@@ -44,14 +44,14 @@
 
   :test
   {:extra-paths ["test"]
-   :extra-deps  {io.github.hive-agi/hive-test {:mvn/version "0.3.15"}
+   :extra-deps  {io.github.hive-agi/hive-test {:mvn/version "0.3.16"}
                  org.clojure/test.check       {:mvn/version "1.1.3"}
                  lambdaisland/kaocha          {:mvn/version "1.91.1392"}}
    :main-opts   ["-m" "kaocha.runner"]}
 
   :nrepl
   {:extra-paths ["dev" "test"]
-   :extra-deps  {io.github.hive-agi/hive-test {:mvn/version "0.3.15"}
+   :extra-deps  {io.github.hive-agi/hive-test {:mvn/version "0.3.16"}
                  nrepl/nrepl                  {:mvn/version "1.7.0"}
                  cider/cider-nrepl            {:mvn/version "0.62.2"}}
    :main-opts   ["-m" "nrepl.cmdline"
