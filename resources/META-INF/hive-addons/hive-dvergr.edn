@@ -5,4 +5,6 @@
  :addon/init-ns "hive-dvergr.addon"
  :addon/init-fn "addon-ctor"
  :addon/capabilities #{:tools :health-reporting :agent-runtime :datahike}
- :addon/description "Experimental dvergr runtime and Datahike evidence adapter for Hive agents"}
+ :addon/description "Experimental dvergr runtime and Datahike evidence adapter for Hive agents"
+ :addon/maturity :experimental
+ :addon/trust-class :foss}
