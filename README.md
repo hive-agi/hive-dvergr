@@ -46,16 +46,37 @@ truncated by a host UI, but artifact/result data in the ledger is not.
 ## Development
 
 ```bash
-clojure -M:local-src:test
+clojure -M:test
 ```
 
-The dvergr dependency is pinned to an exact Git SHA. `:local-src` replaces it
-with `../clones-ref/dvergr` for joint development.
+The dvergr dependency is pinned to an exact Git SHA. The `:local-src` alias
+replaces it with `../clones-ref/dvergr`, and the hive siblings with their
+working trees, for joint development. Committed `deps.edn` stays
+`:mvn/version`-only, so `:local-src` and `:hive-agent-local` live in an
+untracked `local.deps.edn`:
+
+```clojure
+{:aliases
+ {:local-src
+  {:extra-paths ["../hive-schemas/synth"]
+   :override-deps
+   {io.github.hive-agi/hive-addon   {:local/root "../hive-addon"}
+    io.github.hive-agi/hive-dsl     {:local/root "../hive-dsl"}
+    io.github.hive-agi/hive-schemas {:local/root "../hive-schemas"}
+    io.github.hive-agi/hive-test    {:local/root "../hive-test"}
+    org.replikativ/dvergr           {:local/root "../clones-ref/dvergr"}}}
+  :hive-agent-local
+  {:extra-deps {local/hive-agent {:local/root "../hive-agent"}}}}}
+```
+
+```bash
+clojure -Sdeps "$(cat local.deps.edn)" -M:local-src:test
+```
 
 `hive-agent` integration is deliberately optional:
 
 ```bash
-clojure -M:local-src:hive-agent-local:test
+clojure -Sdeps "$(cat local.deps.edn)" -M:local-src:hive-agent-local:test
 ```
 
 ## License
