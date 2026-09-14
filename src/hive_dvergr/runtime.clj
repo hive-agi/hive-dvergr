@@ -94,8 +94,10 @@
     (catch Throwable t
       (if (compare-and-set! terminal? false true)
         (commit-outcome! :run/failed
-                         {:error (ex-message t)
-                          :exception (str (class t))})
+                         (cond-> {:error (ex-message t)
+                                   :exception (str (class t))}
+                           (= :cljw-wasmtime (:sandbox (ex-data t)))
+                           (assoc :sandbox-failure (ex-data t))))
         (recover-outcome runtime (:run/id request) :run/failed)))))
 
 (defn- start-run* [runtime external-request]

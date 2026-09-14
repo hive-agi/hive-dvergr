@@ -6,7 +6,8 @@
             [hive-dvergr.hive-agent :as agent]
             [hive-dvergr.ports :as ports]
             [hive-dvergr.runtime :as runtime]
-            [hive-dvergr.schema :as schema]))
+            [hive-dvergr.schema :as schema]
+            [hive-dvergr.sandbox :as sandbox]))
 
 (defn scripted-runner
   "Deterministic default for installation smoke tests; hosts inject real runners."
@@ -19,6 +20,12 @@
   (or (get-in config [:addon/config key])
       (get config key)
       default))
+
+(defn- configured-runner [defaults config]
+  (let [settings (merge defaults config (:addon/config config))]
+    (if (contains? settings :sandbox)
+      (sandbox/runner (:sandbox settings))
+      (or (:runner settings) scripted-runner))))
 
 (defn- tool-result [value]
   {:content [{:type "text" :text (pr-str value)}]})
@@ -45,8 +52,7 @@
           (try
             (schema/install!)
             (let [run-ledger (:ok ledger-result)
-                  runner (config-value config :runner
-                                       (or (:runner defaults) scripted-runner))
+                  runner (configured-runner defaults config)
                   publisher (config-value config :publish!
                                           (or (:publish! defaults) (constantly nil)))
                   run-runtime (runtime/make-runtime
@@ -80,6 +86,8 @@
       :description "Run one task through dvergr and recover its durable Datahike outcome"
       :inputSchema {:type "object"
                     :properties {"task" {:type "string"}
+                                 "code" {:type "string"
+                                         :description "Clojure source for the configured cljw sandbox"}
                                  "agent_id" {:type "string"}
                                  "timeout_ms" {:type "integer" :minimum 1}}
                     :required ["task"]}
@@ -93,7 +101,9 @@
                                        (:agent_id params)
                                        "hive-dvergr")
                          :run/attempt 0
-                         :run/input {:task (or (get params "task") (:task params))}}
+                         :run/input (cond-> {:task (or (get params "task") (:task params))}
+                                      (or (contains? params "code") (contains? params :code))
+                                      (assoc :code (or (get params "code") (:code params))))}
                 result (runtime/run-sync!
                         run-runtime request
                         {:timeout-ms (long (or (get params "timeout_ms")

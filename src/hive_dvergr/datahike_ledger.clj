@@ -74,7 +74,7 @@
 (defn memory-config
   "Create an isolated in-memory config for deterministic tests and REPL spikes."
   []
-  {:store {:backend :mem :id (random-uuid)}
+  {:store {:backend :memory :id (random-uuid)}
    :schema-flexibility :write})
 
 (defn- storage-event [event]
