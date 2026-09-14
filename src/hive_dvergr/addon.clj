@@ -7,7 +7,8 @@
             [hive-dvergr.ports :as ports]
             [hive-dvergr.runtime :as runtime]
             [hive-dvergr.schema :as schema]
-            [hive-dvergr.sandbox :as sandbox]))
+            [hive-dvergr.sandbox :as sandbox]
+            [hive-spi.notify :as notify]))
 
 (defn scripted-runner
   "Deterministic default for installation smoke tests; hosts inject real runners."
@@ -33,13 +34,28 @@
 (defn- configured-publisher [defaults config]
   (let [settings (merge defaults config (:addon/config config))
         publish! (or (:publish! settings) (constantly nil))
-        olympus (get-in settings [:mount/dependencies "hive.olympus"])]
+        backends (:notify/backends settings)]
+    (doseq [backend backends]
+      (when-not (satisfies? notify/INotify backend)
+        (throw (ex-info "Notification backend must implement INotify" {}))))
     (fn [event]
       (try
         (publish! event)
         (finally
-          (when-let [observe! (and olympus (:olympus/observe! (addon/hooks olympus)))]
-            (observe! event)))))))
+          (doseq [backend backends]
+            (try
+              (when (and (notify/backend-available? backend)
+                         (notify/accepts? backend (:event/type event)))
+                (notify/notify! backend
+                  {:event-type (:event/type event)
+                   :summary (str (:agent/id event) " " (:event/type event))
+                   :body (str "Run " (:run/id event))
+                   :urgency :normal
+                   :level (if (= :run/failed (:event/type event)) :error :info)
+                   :agent-id (:agent/id event)
+                   :run/id (:run/id event)
+                   :timestamp (:event/at event)}))
+              (catch Exception _ nil))))))))
 
 (defrecord HiveDvergrAddon [state defaults]
   addon/IAddon
@@ -151,6 +167,6 @@
   (make-addon))
 
 (defn addon-ctor
-  "Pure mount constructor. Preserve host configuration and optional Olympus observation dependency."
+  "Pure mount constructor. Preserve host configuration and notification ports."
   [config]
-  (make-addon config))
+  (make-addon (merge config (:addon/config config))))

@@ -20,7 +20,8 @@
   org.replikativ/datahike {:mvn/version "0.8.1788"}
 
   ;; Hive's house version wins over dvergr's older transitive Malli pin.
-  metosin/malli {:mvn/version "0.20.1"}}
+  metosin/malli {:mvn/version "0.20.1"}
+  io.github.hive-agi/hive-spi {:mvn/version "1.1.1"}}
 
  :aliases
  {

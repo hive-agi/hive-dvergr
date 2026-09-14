@@ -7,7 +7,8 @@
             [hive-dvergr.addon :as adapter]
             [hive-dvergr.datahike-ledger :as ledger]
             [hive-dvergr.ports :as ports]
-            [hive-dvergr.sandbox-test :as sandbox-test]))
+            [hive-dvergr.sandbox-test :as sandbox-test]
+            [hive-spi.notify :as notify]))
 
 (deftest sandbox-tool-persists-success-and-failure
   (let [cfg (ledger/memory-config)
@@ -15,10 +16,14 @@
         run-ledger (:ok opened)
         fallback-called? (atom false)
         observed (atom [])
-        olympus (reify addon/IAddon
-                  (hooks [_] {:olympus/observe! #(swap! observed conj %)}))
+        observer (reify notify/INotify
+                   (notify-id [_] :test)
+                   (backend-available? [_] true)
+                   (accepts? [_ _] true)
+                   (notify! [_ event] (swap! observed conj event)
+                     {:delivered? true :backend :test :detail {}}))
         instance (adapter/addon-ctor
-                  {:mount/dependencies {"hive.olympus" olympus}
+                  {:notify/backends [observer]
                    :publish! (fn [_] (throw (ex-info "unavailable secondary observer" {})))
                    :ledger run-ledger
                    :sandbox (sandbox-test/config)
@@ -45,7 +50,7 @@
         (is (false? @fallback-called?))
         (is (= [:run/submitted :run/started :run/completed
                 :run/submitted :run/started :run/failed]
-               (mapv :event/type @observed)))
+               (mapv :event-type @observed)))
         (is (= #{(:run/id succeeded) (:run/id failed)} (set (map :run/id @observed)))))
       (finally
         (addon/shutdown! instance)
