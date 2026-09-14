@@ -30,6 +30,17 @@
 (defn- tool-result [value]
   {:content [{:type "text" :text (pr-str value)}]})
 
+(defn- configured-publisher [defaults config]
+  (let [settings (merge defaults config (:addon/config config))
+        publish! (or (:publish! settings) (constantly nil))
+        olympus (get-in settings [:mount/dependencies "hive.olympus"])]
+    (fn [event]
+      (try
+        (publish! event)
+        (finally
+          (when-let [observe! (and olympus (:olympus/observe! (addon/hooks olympus)))]
+            (observe! event)))))))
+
 (defrecord HiveDvergrAddon [state defaults]
   addon/IAddon
 
@@ -53,8 +64,7 @@
             (schema/install!)
             (let [run-ledger (:ok ledger-result)
                   runner (configured-runner defaults config)
-                  publisher (config-value config :publish!
-                                          (or (:publish! defaults) (constantly nil)))
+                  publisher (configured-publisher defaults config)
                   run-runtime (runtime/make-runtime
                                {:runner runner
                                 :ledger run-ledger
@@ -141,12 +151,6 @@
   (make-addon))
 
 (defn addon-ctor
-  "Pure constructor for the `hive.dvergr` IAddon — (config -> IAddon).
-   Resolved by the hive-addon.mount composer via :addon/init-fn; the host then
-   drives register!/initialize! (initialize! reads its own config for db/ledger/
-   runner defaults). Returns the same uninitialized HiveDvergrAddon the legacy
-   init-as-addon! path constructs. Tolerates (ignores) mounter-injected config
-   keys such as :mount/dependencies. Additive: init-as-addon! remains for the
-   current hive-mcp loader."
-  [_config]
-  (make-addon))
+  "Pure mount constructor. Preserve host configuration and optional Olympus observation dependency."
+  [config]
+  (make-addon config))

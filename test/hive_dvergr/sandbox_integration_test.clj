@@ -14,8 +14,13 @@
         opened (ledger/make-ledger cfg)
         run-ledger (:ok opened)
         fallback-called? (atom false)
-        instance (adapter/make-addon
-                  {:ledger run-ledger
+        observed (atom [])
+        olympus (reify addon/IAddon
+                  (hooks [_] {:olympus/observe! #(swap! observed conj %)}))
+        instance (adapter/addon-ctor
+                  {:mount/dependencies {"hive.olympus" olympus}
+                   :publish! (fn [_] (throw (ex-info "unavailable secondary observer" {})))
+                   :ledger run-ledger
                    :sandbox (sandbox-test/config)
                    :runner (fn [_] (reset! fallback-called? true))})]
     (is (some? run-ledger) (pr-str opened))
@@ -37,7 +42,11 @@
         (is (string? (get-in failure-row [:run/result :sandbox-failure :output])))
         (is (= [:run/submitted :run/started :run/failed]
                (mapv :event/type (:ok (ports/run-events run-ledger (:run/id failed))))))
-        (is (false? @fallback-called?)))
+        (is (false? @fallback-called?))
+        (is (= [:run/submitted :run/started :run/completed
+                :run/submitted :run/started :run/failed]
+               (mapv :event/type @observed)))
+        (is (= #{(:run/id succeeded) (:run/id failed)} (set (map :run/id @observed)))))
       (finally
         (addon/shutdown! instance)
         (when run-ledger (ports/close-ledger! run-ledger))
