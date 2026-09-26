@@ -17,10 +17,10 @@
    :git/sha "3093b6cd97118d3cb36e2f11d5f17ebb2f7743c6"}
 
   ;; Explicit authority for run evidence. Do not rely on dvergr transitively.
-  org.replikativ/datahike {:mvn/version "0.8.1895"}
+  org.replikativ/datahike {:mvn/version "0.8.1899"}
 
   ;; Hive's house version wins over dvergr's older transitive Malli pin.
-  metosin/malli {:mvn/version "0.20.1"}
+  metosin/malli {:mvn/version "0.20.2"}
   io.github.hive-agi/hive-spi {:mvn/version "1.4.1"}}
 
  :aliases
