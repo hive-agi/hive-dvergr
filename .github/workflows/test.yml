@@ -9,6 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # lucene 10 (via datahike) is class version 65: the runner default JDK 17 cannot load it.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
       - uses: DeLaGuardo/setup-clojure@13.2
         with:
           cli: latest

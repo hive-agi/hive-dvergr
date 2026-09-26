@@ -21,7 +21,8 @@
 
   ;; Hive's house version wins over dvergr's older transitive Malli pin.
   metosin/malli {:mvn/version "0.20.2"}
-  io.github.hive-agi/hive-spi {:mvn/version "1.4.1"}}
+  io.github.hive-agi/hive-spi {:mvn/version "1.4.1"}
+  org.replikativ/scriptum {:mvn/version "0.1.32"}}
 
  :aliases
  {
