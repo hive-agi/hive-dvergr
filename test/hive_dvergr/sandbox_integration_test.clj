@@ -7,10 +7,10 @@
             [hive-dvergr.addon :as adapter]
             [hive-dvergr.datahike-ledger :as ledger]
             [hive-dvergr.ports :as ports]
-            [hive-dvergr.sandbox-test :as sandbox-test]
+            [hive-dvergr.sandbox-test :as sandbox-test :refer [deftest-runtime]]
             [hive-spi.notify :as notify]))
 
-(deftest sandbox-tool-persists-success-and-failure
+(deftest-runtime sandbox-tool-persists-success-and-failure
   (let [cfg (ledger/memory-config)
         opened (ledger/make-ledger cfg)
         run-ledger (:ok opened)

@@ -18,25 +18,50 @@
   (try (f) nil
        (catch clojure.lang.ExceptionInfo e (ex-data e))))
 
+(defn runtime-configured?
+  "True when the host supplied a Wasmtime executable and a cljw module.
+   Neither set means a CI runner without the runtime, not a bug; exactly one
+   set is a misconfiguration and still runs, so it fails loudly."
+  []
+  (let [{:keys [wasmtime module]} (config)]
+    (boolean (or (seq wasmtime) (seq module)))))
+
+(defn skip-without-runtime [test-name]
+  (let [message (str "SKIPPED " test-name ": no cljw runtime configured "
+                     "(set HIVE_WASMTIME and HIVE_CLJW_WASM; see scripts/verify-sandbox.sh)")]
+    (println message)
+    (is true message)))
+
+(defmacro deftest-runtime
+  "deftest for tests that execute a real Wasmtime/cljw artifact. When neither
+   HIVE_WASMTIME nor HIVE_CLJW_WASM is set the test is skipped with a message."
+  [test-name & body]
+  `(deftest ~test-name
+     (if (runtime-configured?)
+       (do ~@body)
+       (skip-without-runtime '~test-name))))
+
 (deftest configuration-fails-closed
   (is (= :invalid-runtime-path
          (:reason (failure #(sandbox/runner (assoc (config) :wasmtime "/nonexistent/wasmtime"))))))
   (is (= :unknown-options
          (:reason (failure #(sandbox/runner (assoc (config) :args ["--dir" "/"]))))))
   (is (= :invalid-limit
-         (:reason (failure #(sandbox/runner (assoc (config) :fuel 0))))))
+         (:reason (failure #(sandbox/runner (assoc (config) :fuel 0)))))))
+
+(deftest-runtime configuration-with-runtime-fails-closed
   (is (= :missing-code
          (:reason (failure #((sandbox/runner (config)) {:run/input {:task "ignored"}})))))
   (is (= :input-limit
          (:reason (failure #(evaluate {:input-bytes 1} "(println 42)"))))))
 
-(deftest evaluates-and-isolates-runs
+(deftest-runtime evaluates-and-isolates-runs
   (is (= "4950\n" (:output (evaluate "(println (reduce + (range 100)))"))))
   (evaluate "(def run-private-value 41)")
   (is (= "nil\n" (:output (evaluate "(println (resolve 'run-private-value))"))))
   (is (= "nil\n" (:output (evaluate "(println (System/getenv \"HIVE_SANDBOX_SENTINEL\"))")))))
 
-(deftest filesystem-is-not-the-host
+(deftest-runtime filesystem-is-not-the-host
   (let [sentinel (Files/createTempFile "hive-host-sentinel-" ".txt"
                                         (make-array FileAttribute 0))
         secret (str "host-only-" (random-uuid))]
@@ -53,12 +78,12 @@
              (:reason (failure #(evaluate "(spit \"guest-write\" \"no\")")))))
       (finally (Files/deleteIfExists sentinel)))))
 
-(deftest no-host-process-execution
+(deftest-runtime no-host-process-execution
   (is (= :guest-failed
          (:reason
           (failure #(evaluate "(require '[clojure.java.shell :as sh]) (sh/sh \"sh\" \"-c\" \"echo escaped\")"))))))
 
-(deftest network-cannot-reach-host
+(deftest-runtime network-cannot-reach-host
   (with-open [listener (ServerSocket. 0 1 (InetAddress/getByName "127.0.0.1"))]
     (.setSoTimeout listener 200)
     (let [source (str "(cljw.http.client/get \"http://127.0.0.1:"
@@ -70,7 +95,7 @@
             (catch SocketTimeoutException _ true))
           "No connection reaches the host listener"))))
 
-(deftest interrupt-kills-the-wasmtime-process
+(deftest-runtime interrupt-kills-the-wasmtime-process
   (let [process-var (ns-resolve 'hive-dvergr.sandbox 'process!)
         original @process-var
         started (promise)
@@ -97,7 +122,7 @@
               (.interrupt thread)
               (.join thread 5000))))))))
 
-(deftest resource-exhaustion-is-terminal
+(deftest-runtime resource-exhaustion-is-terminal
   (testing "fuel traps a running infinite loop"
     (let [result (failure #(evaluate {:fuel 100000000} "(loop [] (recur))"))]
       (is (= :guest-failed (:reason result)))
