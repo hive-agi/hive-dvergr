@@ -73,6 +73,16 @@ jobs:
       - name: Resolve declared classpath
         run: clojure -P
 
+      # The sandbox runtime tests (deftest-runtime) need a Wasmtime binary and
+      # a cljw module. Without them they skip, and kaocha's output capture
+      # hides their SKIPPED lines, so the skip is announced here instead.
+      - name: cljw runtime
+        run: |
+          if [ -z "${HIVE_WASMTIME:-}${HIVE_CLJW_WASM:-}" ]; then
+            echo "::warning title=cljw runtime absent::HIVE_WASMTIME and HIVE_CLJW_WASM are unset: the sandbox runtime tests (deftest-runtime, test/hive_dvergr/sandbox_test.clj) are SKIPPED. scripts/verify-sandbox.sh runs them against a real runtime."
+            echo "cljw runtime absent: sandbox runtime tests SKIPPED (set HIVE_WASMTIME and HIVE_CLJW_WASM)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Test
         run: |
           set -euo pipefail
