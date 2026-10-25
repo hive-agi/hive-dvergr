@@ -4,7 +4,7 @@
  {org.clojure/clojure {:mvn/version "1.12.6"}
 
   ;; Standalone host-neutral addon contract.
-  io.github.hive-agi/hive-addon {:mvn/version "1.1.8"}
+  io.github.hive-agi/hive-addon {:mvn/version "1.1.10"}
 
   ;; Result ADT and shared Malli registry.
   io.github.hive-agi/hive-dsl
